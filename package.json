@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "commitlint-config-wizardoc": "^1.0.1"
+  }
+}
