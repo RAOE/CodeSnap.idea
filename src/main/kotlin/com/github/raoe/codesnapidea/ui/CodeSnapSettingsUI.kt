@@ -1,6 +1,5 @@
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.ServiceManager
-import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
 import javax.swing.*
@@ -15,7 +14,6 @@ class CodeSnapSettingsUI {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         border = BorderFactory.createEmptyBorder(0, 10, 0, 10)
     }
-    private val basicSettingTitle: JLabel = JLabel("Project settings")
     private val defaultSavePathLabel: JLabel = JLabel("Default image save path:")
     private val mySavePathArea: JTextField = JTextField(20)  // 5行40列
     private val mySavePathButton: JButton = JButton("Choose")

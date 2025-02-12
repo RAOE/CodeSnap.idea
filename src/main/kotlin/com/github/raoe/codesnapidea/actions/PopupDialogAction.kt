@@ -11,10 +11,9 @@ import javax.swing.Icon
 
 /**
  *  ClassName：PopupDialogAction
-Package:com.github.raoe.codesnapidea.actions
-@DATE:06/11/2024 10:34 pm
-@Author:XuYuanFeng
-TODO:
+    Package:com.github.raoe.codesnapidea.actions
+    @DATE:06/11/2024 10:34 pm
+    @Author:XuYuanFeng
  */
 
 class PopupDialogAction: AnAction {

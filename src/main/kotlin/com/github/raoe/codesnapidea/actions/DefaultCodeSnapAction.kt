@@ -9,10 +9,9 @@ import javax.swing.Icon
 
 /**
  *  ClassName：DefaultCodeSnapAction
-Package:com.github.raoe.codesnapidea.actions
-@DATE:10/11/2024 3:13 pm
-@Author:XuYuanFeng
-TODO:
+    Package:com.github.raoe.codesnapidea.actions
+    @DATE:10/11/2024 3:13 pm
+    @Author:XuYuanFeng
  */
 class DefaultCodeSnapAction: AnAction() {
     /**

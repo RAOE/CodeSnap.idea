@@ -10,10 +10,9 @@ import javax.swing.Icon
 
 /**
  *  ClassName：JpgCodeSnapAction
-Package:com.github.raoe.codesnapidea.actions
-@DATE:10/11/2024 3:15 pm
-@Author:XuYuanFeng
-TODO:
+    Package:com.github.raoe.codesnapidea.actions
+    @DATE:10/11/2024 3:15 pm
+    @Author:XuYuanFeng
  */
 
 class JpgCodeSnapAction: AnAction() {

@@ -10,10 +10,9 @@ import javax.swing.Icon
 
 /**
  *  ClassName：AsciiCodeSnapAction
-Package:com.github.raoe.codesnapidea.actions
-@DATE:10/11/2024 4:02 pm
-@Author:XuYuanFeng
-TODO: ASCII CodeSnap
+    Package:com.github.raoe.codesnapidea.actions
+    @DATE:10/11/2024 4:02 pm
+    @Author:XuYuanFeng
  */
 class AsciiCodeSnapAction: AnAction() {
     override fun actionPerformed(event: AnActionEvent) {

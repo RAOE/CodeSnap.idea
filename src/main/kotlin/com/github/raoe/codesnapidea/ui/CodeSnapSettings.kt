@@ -6,10 +6,9 @@ import com.intellij.openapi.components.Storage
 
 /**
  *  ClassName：CodeSnapSettings
-Package:com.github.raoe.codesnapidea.ui
-@DATE:13/11/2024 10:11 pm
-@Author:XuYuanFeng
-TODO:
+    Package:com.github.raoe.codesnapidea.ui
+    @DATE:13/11/2024 10:11 pm
+    @Author:XuYuanFeng
  */
 @State(name = "CodeSnapSettings", storages = [Storage("codeSnapSettings.xml")])
 class CodeSnapSettings : PersistentStateComponent<CodeSnapSettings.State> {

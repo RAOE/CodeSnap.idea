@@ -10,10 +10,9 @@ import javax.swing.Icon
 
 /**
  *  ClassName：SvgCodeSnapAction
-Package:com.github.raoe.codesnapidea.actions
-@DATE:10/11/2024 3:14 pm
-@Author:XuYuanFeng
-TODO:
+    Package:com.github.raoe.codesnapidea.actions
+    @DATE:10/11/2024 3:14 pm
+    @Author:XuYuanFeng
  */
 
 class SvgCodeSnapAction: AnAction() {
