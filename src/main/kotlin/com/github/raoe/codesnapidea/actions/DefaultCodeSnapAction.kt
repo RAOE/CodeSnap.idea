@@ -37,7 +37,7 @@ class DefaultCodeSnapAction: AnAction() {
             message.append(selectedText).append(" Selected!Default")
             if (codesnapExeExists) {
                 try {
-                    executeCommand(codesnapExePath, selectedText, message)
+                    message.append(executeCommand(codesnapExePath, selectedText, message))
                 } catch (e: IOException) {
                     message.append("\n执行 codesnap.exe excuted failed! Error message：${e.message}")
                 }
@@ -48,7 +48,7 @@ class DefaultCodeSnapAction: AnAction() {
             message.append("No text selected!")
         }
 
-        val title = "Selection Info"
+        val title = "codesnap"
         val icon: Icon = Messages.getInformationIcon()
         Messages.showMessageDialog(
             project,
@@ -62,7 +62,7 @@ class DefaultCodeSnapAction: AnAction() {
 /**
  * 执行命令
  */
-private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder) {
+private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder):String {
     try {
         val userHome = System.getProperty("user.home")
         val tempDir = File(userHome, "codeSnap")
@@ -72,13 +72,15 @@ private fun executeCommand(codesnapExePath: String, selectedText: String, messag
         val tempFile = File(tempDir, UUID.randomUUID().toString()+".txt")
         tempFile.writeText(selectedText)
         val tempFilePath = tempFile.absolutePath
-        val command = "$codesnapExePath -f $tempFilePath --output $userHome\\output.png"
+        val command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output.png"
         println("执行命令：$command")
         val process = Runtime.getRuntime().exec(command)
         val stdInput = BufferedReader(InputStreamReader(process.getInputStream()))
         var s: String?
         println("标准输出:")
+        val sb = StringBuilder();
         while ((stdInput.readLine().also { s = it }) != null) {
+            sb.append(s);
             println(s)
         }
         // 捕获错误输出
@@ -89,7 +91,10 @@ private fun executeCommand(codesnapExePath: String, selectedText: String, messag
         }
         val exitCode = process.waitFor()
         println("命令执行完毕，退出码: " + exitCode)
+        return sb.toString();
     } catch (e: Exception) {
         e.printStackTrace()
+        return "执行命令失败！错误信息：${e.message}"
     }
+    return ""
 }
