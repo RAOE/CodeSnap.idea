@@ -5,7 +5,14 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import groovy.util.logging.Slf4j
+import java.io.BufferedReader
+import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.UUID
 import javax.swing.Icon
+import kotlin.random.Random
 
 /**
  *  ClassName：DefaultCodeSnapAction
@@ -13,21 +20,34 @@ import javax.swing.Icon
     @DATE:10/11/2024 3:13 pm
     @Author:XuYuanFeng
  */
+@Slf4j
 class DefaultCodeSnapAction: AnAction() {
-    /**
-     * default codeSnap
-     */
+
+    val DEFAULT_CODE_SNAP_PATH = "D:\\code_snap.idea\\CodeSnap.idea\\src\\main\\resources\\lib\\codesnap.exe";
     override fun actionPerformed(event: AnActionEvent) {
         val editor: Editor? = event.getData(CommonDataKeys.EDITOR)
         val project: Project? = event.getData(CommonDataKeys.PROJECT)
         val selectedText: String? = editor?.selectionModel?.selectedText
         val message = StringBuilder()
+
+        val codesnapExePath = DEFAULT_CODE_SNAP_PATH;
+        val codesnapExeExists = File(codesnapExePath).exists()
+
         if (!selectedText.isNullOrEmpty()) {
             message.append(selectedText).append(" Selected!Default")
-            // call the native function
+            if (codesnapExeExists) {
+                try {
+                    executeCommand(codesnapExePath, selectedText, message)
+                } catch (e: IOException) {
+                    message.append("\n执行 codesnap.exe excuted failed! Error message：${e.message}")
+                }
+            } else {
+                message.append("\ncan't find codesnap.exe file，execute failed！")
+            }
         } else {
             message.append("No text selected!")
         }
+
         val title = "Selection Info"
         val icon: Icon = Messages.getInformationIcon()
         Messages.showMessageDialog(
@@ -36,5 +56,40 @@ class DefaultCodeSnapAction: AnAction() {
             title,
             icon
         )
+    }
+}
+
+/**
+ * 执行命令
+ */
+private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder) {
+    try {
+        val userHome = System.getProperty("user.home")
+        val tempDir = File(userHome, "codeSnap")
+        if (!tempDir.exists()) {
+            tempDir.mkdirs()
+        }
+        val tempFile = File(tempDir, UUID.randomUUID().toString()+".txt")
+        tempFile.writeText(selectedText)
+        val tempFilePath = tempFile.absolutePath
+        val command = "$codesnapExePath -f $tempFilePath --output $userHome\\output.png"
+        println("执行命令：$command")
+        val process = Runtime.getRuntime().exec(command)
+        val stdInput = BufferedReader(InputStreamReader(process.getInputStream()))
+        var s: String?
+        println("标准输出:")
+        while ((stdInput.readLine().also { s = it }) != null) {
+            println(s)
+        }
+        // 捕获错误输出
+        val stdError = BufferedReader(InputStreamReader(process.getErrorStream()))
+        println("错误输出:")
+        while ((stdError.readLine().also { s = it }) != null) {
+            println(s)
+        }
+        val exitCode = process.waitFor()
+        println("命令执行完毕，退出码: " + exitCode)
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
