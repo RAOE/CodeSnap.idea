@@ -12,7 +12,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 class SvgCodeSnapAction: DefaultCodeSnapAction() {
     //重写actionPerformed
     override fun actionPerformed(event: AnActionEvent) {
-        DEFAULT_FORMATTER = ".svg"
+        formatter = ".svg"
         super.actionPerformed(event)
     }
 }

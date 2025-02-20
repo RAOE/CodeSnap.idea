@@ -13,7 +13,7 @@ class JpgCodeSnapAction: DefaultCodeSnapAction() {
      * @param event
      */
     override fun actionPerformed(event: AnActionEvent) {
-        DEFAULT_FORMATTER = ".jpg";
+        formatter = ".jpg";
         super.actionPerformed(event)
     }
 }

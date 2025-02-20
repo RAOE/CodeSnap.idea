@@ -29,7 +29,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 open class DefaultCodeSnapAction: AnAction() {
 
     val DEFAULT_CODE_SNAP_PATH = "C:\\code_snap.idea\\CodeSnap.idea\\src\\main\\resources\\lib\\codesnap.exe";
-    var DEFAULT_FORMATTER = ".png";
+    var formatter = ".png";
 
     override fun actionPerformed(event: AnActionEvent) {
         val editor: Editor? = event.getData(CommonDataKeys.EDITOR)
@@ -48,8 +48,8 @@ open class DefaultCodeSnapAction: AnAction() {
         if (!selectedText.isNullOrEmpty()) {
             if (codesnapExeExists) {
                 try {
-                    executeCommand(codesnapExePath, selectedText, message)
-                    message.append("\nSnapshot saved to ${System.getProperty("user.home")}\\desktop\\output"+DEFAULT_FORMATTER+" successful!")
+                    executeCommand(codesnapExePath, selectedText, message,formatter)
+                    message.append("\nSnapshot saved to ${System.getProperty("user.home")}\\desktop\\output"+formatter+" successful!")
                 } catch (e: IOException) {
                     message.append("\n执行 codesnap.exe excuted failed! Error message：${e.message}")
                 }
@@ -103,7 +103,7 @@ open class DefaultCodeSnapAction: AnAction() {
     /**
      * 执行命令
      */
-    private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder):String {
+    private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder,format:String):String {
         try {
             val userHome = System.getProperty("user.home")
             val tempDir = File(userHome, "codeSnap")
@@ -113,7 +113,7 @@ open class DefaultCodeSnapAction: AnAction() {
             val tempFile = File(tempDir, UUID.randomUUID().toString()+".txt")
             tempFile.writeText(selectedText)
             val tempFilePath = tempFile.absolutePath
-            val command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output.png"
+            val command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format;
             println("执行命令：$command")
             val process = Runtime.getRuntime().exec(command)
             val stdInput = BufferedReader(InputStreamReader(process.getInputStream()))
