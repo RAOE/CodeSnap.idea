@@ -1,5 +1,18 @@
 .gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+.DS_Store
+
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
 .idea
-.intellijPlatform
-.qodana
-build
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+### VS Code ###
+.vscode/
