@@ -22,7 +22,6 @@ class AsciiCodeSnapAction: AnAction() {
         val message = StringBuilder()
         if (!selectedText.isNullOrEmpty()) {
             message.append(selectedText).append(" Selected!JPG")
-            // call the native function
         } else {
             message.append("No text selected!")
         }

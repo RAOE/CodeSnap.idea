@@ -26,9 +26,11 @@ import com.intellij.openapi.diagnostic.thisLogger
     @Author:XuYuanFeng
  */
 @Slf4j
-class DefaultCodeSnapAction: AnAction() {
+open class DefaultCodeSnapAction: AnAction() {
 
     val DEFAULT_CODE_SNAP_PATH = "C:\\code_snap.idea\\CodeSnap.idea\\src\\main\\resources\\lib\\codesnap.exe";
+    var DEFAULT_FORMATTER = ".png";
+
     override fun actionPerformed(event: AnActionEvent) {
         val editor: Editor? = event.getData(CommonDataKeys.EDITOR)
         val project: Project? = event.getData(CommonDataKeys.PROJECT)
@@ -41,12 +43,13 @@ class DefaultCodeSnapAction: AnAction() {
             codesnapExePath = getCodesnapExePath()
             codesnapExeExists = File(codesnapExePath).exists()
         }
+        //Snapshot saved to C:\Users\xu\desktop\output.png successful!
         thisLogger().info("codesnapExePath: $codesnapExePath");
         if (!selectedText.isNullOrEmpty()) {
-            message.append(selectedText).append(" Selected!Default")
             if (codesnapExeExists) {
                 try {
-                    message.append(executeCommand(codesnapExePath, selectedText, message))
+                    executeCommand(codesnapExePath, selectedText, message)
+                    message.append("\nSnapshot saved to ${System.getProperty("user.home")}\\desktop\\output"+DEFAULT_FORMATTER+" successful!")
                 } catch (e: IOException) {
                     message.append("\n执行 codesnap.exe excuted failed! Error message：${e.message}")
                 }
@@ -57,7 +60,7 @@ class DefaultCodeSnapAction: AnAction() {
             message.append("No text selected!")
         }
 
-        val title = "codesnap"
+        val title = "CodeSnap: Capture Code Snapshot"
         val icon: Icon = Messages.getInformationIcon()
         Messages.showMessageDialog(
             project,
