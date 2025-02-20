@@ -18,7 +18,9 @@ import java.util.UUID
 import javax.swing.Icon
 import kotlin.jvm.java
 import com.intellij.openapi.diagnostic.thisLogger
-
+import groovy.util.logging.Log4j2
+import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 /**
  *  ClassName：DefaultCodeSnapAction
     Package:com.github.raoe.codesnapidea.actions
@@ -32,7 +34,10 @@ open class DefaultCodeSnapAction: AnAction() {
     var formatter = ".png";
     //生成到桌面还是剪贴板 默认剪贴板
     var outputToClipboard = true;
-
+    companion object {
+        // 初始化 Slf4j 日志记录器
+        private val logger = LoggerFactory.getLogger(DefaultCodeSnapAction::class.java)
+    }
     /**
      * 默认数据
      * @param event
@@ -40,7 +45,7 @@ open class DefaultCodeSnapAction: AnAction() {
     override fun actionPerformed(event: AnActionEvent) {
         val editor: Editor? = event.getData(CommonDataKeys.EDITOR)
         val project: Project? = event.getData(CommonDataKeys.PROJECT)
-        val selectedText: String? = editor?.selectionModel?.selectedText
+        var selectedText: String? = editor?.selectionModel?.selectedText
         val message = StringBuilder()
         var codesnapExePath = DEFAULT_CODE_SNAP_PATH;
         var codesnapExeExists = File(codesnapExePath).exists()
@@ -48,8 +53,8 @@ open class DefaultCodeSnapAction: AnAction() {
             codesnapExePath = getCodesnapExePath()
             codesnapExeExists = File(codesnapExePath).exists()
         }
-        //Snapshot saved to C:\Users\xu\desktop\output.png successful!
-        thisLogger().info("codesnapExePath: $codesnapExePath");
+        logger.info("codesnapExePath: $codesnapExePath");
+
         if (!selectedText.isNullOrEmpty()) {
             if (codesnapExeExists) {
                 try {
@@ -74,6 +79,10 @@ open class DefaultCodeSnapAction: AnAction() {
             icon
         )
     }
+
+    /**
+     * 获取codesnap.exe路径
+     */
     fun getCodesnapExePath(): String {
         val userHome = System.getProperty("user.home")
         val targetDir = File("$userHome/codeSnap")
@@ -81,7 +90,7 @@ open class DefaultCodeSnapAction: AnAction() {
 
         // 如果目标文件已经存在，直接返回路径
         if (targetFile.exists()) {
-            thisLogger().info("codesnap.exe already exists at ${targetFile.absolutePath}")
+            logger.info("codesnap.exe already exists at ${targetFile.absolutePath}")
             return targetFile.absolutePath
         }
 
@@ -92,16 +101,16 @@ open class DefaultCodeSnapAction: AnAction() {
         val resourcePath = "/lib/codesnap.exe"
         val inputStream: InputStream? = Class.forName("com.github.raoe.codesnapidea.actions.DefaultCodeSnapAction").getResourceAsStream(resourcePath)
         if (inputStream == null) {
-            thisLogger().info("Unable to find codesnap.exe in resources: $resourcePath")
+            logger.info("Unable to find codesnap.exe in resources: $resourcePath")
             return ""
         }
         // 将资源文件写入目标路径
         try {
             Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            thisLogger().info("Successfully copied codesnap.exe to ${targetFile.absolutePath}")
+            logger.info("Successfully copied codesnap.exe to ${targetFile.absolutePath}")
             return targetFile.absolutePath
         } catch (e: Exception) {
-            thisLogger().error("Failed to copy codesnap.exe: ${e.message}", e)
+            logger.error("Failed to copy codesnap.exe: ${e.message}", e)
             return ""
         }
     }
@@ -118,17 +127,18 @@ open class DefaultCodeSnapAction: AnAction() {
             val tempFile = File(tempDir, UUID.randomUUID().toString()+".txt")
             tempFile.writeText(selectedText)
             val tempFilePath = tempFile.absolutePath
-            var command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format;
+            val selectedText = selectedText.trimIndent().replace("\"", "\\\"").replace("\n", "\\n")
+            var command = """$codesnapExePath -c $selectedText --output clipboard"""
             if(outputToClipboard){
-                command = "$codesnapExePath -f $tempFilePath --output clipboard"
+                command = """$codesnapExePath -c "$selectedText" --output clipboard"""
             }else{
                 command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format
             }
-            thisLogger().info("command: $command")
+            println("command: $command")
             val process = Runtime.getRuntime().exec(command)
             val stdInput = BufferedReader(InputStreamReader(process.getInputStream()))
             var s: String?
-            thisLogger().info("命令执行中...")
+            logger.info("命令执行中...")
             val sb = StringBuilder();
             while ((stdInput.readLine().also { s = it }) != null) {
                 sb.append(s);
@@ -136,12 +146,12 @@ open class DefaultCodeSnapAction: AnAction() {
             }
             // 捕获错误输出
             val stdError = BufferedReader(InputStreamReader(process.getErrorStream()))
-            thisLogger().info("错误输出:")
+            logger.info("错误输出:")
             while ((stdError.readLine().also { s = it }) != null) {
                 println(s)
             }
             val exitCode = process.waitFor()
-            thisLogger().info("命令执行完毕，退出码: $exitCode")
+            logger.info("命令执行完毕，退出码: $exitCode")
             //清空临时文件
             if (tempFile.exists()){
                 tempFile.delete()

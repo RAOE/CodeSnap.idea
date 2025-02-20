@@ -17,7 +17,7 @@
         <group id="org.intellij.sdk.action.GroupedActions"
                text="Static Grouped Actions" description="SDK statically grouped action example"
                popup="true" icon="SdkIcons.Sdk_default_icon">
-            <action id="org.intellij.sdk.action.CodeSnapConfigurable" class="com.github.raoe.codesnapidea.actions.PopupDialogAction"
+            <action id="org.intellij.sdk.action.CodeSnapConfigurable" class="com.github.raoe.codesnapidea.actions.pop.PopupDialogAction"
                     text="CodeSnap" description="SDK action example"
                     icon="SdkIcons.Sdk_default_icon">
                 <!-- 添加到工具菜单 -->
@@ -33,10 +33,9 @@
         <group id="codeSnapAction" text="CodeSnap" popup="true" icon="SdkIcons.Sdk_default_icon">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <action id="Copy into clipboard" class="com.github.raoe.codesnapidea.actions.DefaultCodeSnapAction" text="Copy into Clipboard"/>
-            <action id="Copy PNG into clipboard" class="com.github.raoe.codesnapidea.actions.PngCodeSnapAction" text="Copy PNG into Clipboar"/>
             <action id="Copy SVG into clipboard" class="com.github.raoe.codesnapidea.actions.SvgCodeSnapAction" text="Copy SVG into Clipboard"/>
             <action id="Copy ASCII into clipboard" class="com.github.raoe.codesnapidea.actions.AsciiCodeSnapAction" text="Copy ASCII into Clipboard"/>
-            <action id="Copy into deskTop" class="com.github.raoe.codesnapidea.actions.DefaultDeskTopCodeSnapAction" text="Copy into deskTop"/>
+            <action id="Copy into deskTop" class="com.github.raoe.codesnapidea.actions.DefaultDeskTopCodeSnapAction" text="Copy into DeskTop"/>
         </group>
     </actions>
     <extensions defaultExtensionNs="com.intellij">

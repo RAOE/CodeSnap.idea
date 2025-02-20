@@ -1,4 +1,4 @@
-package com.github.raoe.codesnapidea.actions
+package com.github.raoe.codesnapidea.actions.pop
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
