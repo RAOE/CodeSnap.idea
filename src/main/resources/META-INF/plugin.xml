@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>com.github.raoe.codesnapidea</id>
     <name>CodeSnap.idea</name>
-    <vendor email="a986771570@gmail.com" url="https://github.com/RAOE/CodeSnap.idea">
+    <vendor email="a986771570@gmail.com/986771570@qq.com" url="https://github.com/RAOE/CodeSnap.idea">
         xuyuanfeng
     </vendor>
     <depends>com.intellij.modules.platform</depends>
@@ -33,9 +33,10 @@
         <group id="codeSnapAction" text="CodeSnap" popup="true" icon="SdkIcons.Sdk_default_icon">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <action id="Copy into clipboard" class="com.github.raoe.codesnapidea.actions.DefaultCodeSnapAction" text="Copy into Clipboard"/>
-            <action id="Copy JPG into clipboard" class="com.github.raoe.codesnapidea.actions.JpgCodeSnapAction" text="Copy JPG into Clipboar"/>
+            <action id="Copy PNG into clipboard" class="com.github.raoe.codesnapidea.actions.PngCodeSnapAction" text="Copy PNG into Clipboar"/>
             <action id="Copy SVG into clipboard" class="com.github.raoe.codesnapidea.actions.SvgCodeSnapAction" text="Copy SVG into Clipboard"/>
             <action id="Copy ASCII into clipboard" class="com.github.raoe.codesnapidea.actions.AsciiCodeSnapAction" text="Copy ASCII into Clipboard"/>
+            <action id="Copy into deskTop" class="com.github.raoe.codesnapidea.actions.DefaultDeskTopCodeSnapAction" text="Copy into deskTop"/>
         </group>
     </actions>
     <extensions defaultExtensionNs="com.intellij">

@@ -7,13 +7,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent
     @Author:XuYuanFeng
  */
 
-class JpgCodeSnapAction: DefaultCodeSnapAction() {
+class PngCodeSnapAction: DefaultCodeSnapAction() {
     /**
      * 执行命令
      * @param event
      */
     override fun actionPerformed(event: AnActionEvent) {
-        formatter = ".jpg";
         super.actionPerformed(event)
     }
 }

@@ -27,17 +27,22 @@ import com.intellij.openapi.diagnostic.thisLogger
  */
 @Slf4j
 open class DefaultCodeSnapAction: AnAction() {
-
     val DEFAULT_CODE_SNAP_PATH = "C:\\code_snap.idea\\CodeSnap.idea\\src\\main\\resources\\lib\\codesnap.exe";
+    //默认png
     var formatter = ".png";
+    //生成到桌面还是剪贴板 默认剪贴板
+    var outputToClipboard = true;
 
+    /**
+     * 默认数据
+     * @param event
+     */
     override fun actionPerformed(event: AnActionEvent) {
         val editor: Editor? = event.getData(CommonDataKeys.EDITOR)
         val project: Project? = event.getData(CommonDataKeys.PROJECT)
         val selectedText: String? = editor?.selectionModel?.selectedText
         val message = StringBuilder()
         var codesnapExePath = DEFAULT_CODE_SNAP_PATH;
-        //获取lib下的\src\main\resources\lib\codesnap.exe
         var codesnapExeExists = File(codesnapExePath).exists()
         if(!codesnapExeExists){
             codesnapExePath = getCodesnapExePath()
@@ -113,12 +118,17 @@ open class DefaultCodeSnapAction: AnAction() {
             val tempFile = File(tempDir, UUID.randomUUID().toString()+".txt")
             tempFile.writeText(selectedText)
             val tempFilePath = tempFile.absolutePath
-            val command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format;
-            println("执行命令：$command")
+            var command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format;
+            if(outputToClipboard){
+                command = "$codesnapExePath -f $tempFilePath --output clipboard"
+            }else{
+                command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format
+            }
+            thisLogger().info("command: $command")
             val process = Runtime.getRuntime().exec(command)
             val stdInput = BufferedReader(InputStreamReader(process.getInputStream()))
             var s: String?
-            println("标准输出:")
+            thisLogger().info("命令执行中...")
             val sb = StringBuilder();
             while ((stdInput.readLine().also { s = it }) != null) {
                 sb.append(s);
@@ -126,12 +136,12 @@ open class DefaultCodeSnapAction: AnAction() {
             }
             // 捕获错误输出
             val stdError = BufferedReader(InputStreamReader(process.getErrorStream()))
-            println("错误输出:")
+            thisLogger().info("错误输出:")
             while ((stdError.readLine().also { s = it }) != null) {
                 println(s)
             }
             val exitCode = process.waitFor()
-            println("命令执行完毕，退出码: " + exitCode)
+            thisLogger().info("命令执行完毕，退出码: $exitCode")
             //清空临时文件
             if (tempFile.exists()){
                 tempFile.delete()
