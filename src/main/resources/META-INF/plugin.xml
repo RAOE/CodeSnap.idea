@@ -2,17 +2,45 @@
 <idea-plugin>
     <id>com.github.raoe.codesnapidea</id>
     <name>CodeSnap.idea</name>
-    <vendor>raoe</vendor>
-
+    <vendor email="a986771570@gmail.com/986771570@qq.com" url="https://github.com/RAOE/CodeSnap.idea">
+        xuyuanfeng
+    </vendor>
     <depends>com.intellij.modules.platform</depends>
-
     <resource-bundle>messages.MyBundle</resource-bundle>
-
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.raoe.codesnapidea.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
     </extensions>
-
     <applicationListeners>
         <listener class="com.github.raoe.codesnapidea.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
+    <actions>
+        <group id="org.intellij.sdk.action.GroupedActions"
+               text="Static Grouped Actions" description="SDK statically grouped action example"
+               popup="true" icon="SdkIcons.Sdk_default_icon">
+            <action id="org.intellij.sdk.action.CodeSnapConfigurable" class="com.github.raoe.codesnapidea.actions.PopupDialogAction"
+                    text="CodeSnap" description="SDK action example"
+                    icon="SdkIcons.Sdk_default_icon">
+                <!-- 添加到工具菜单 -->
+                <add-to-group group-id="ToolsMenu" anchor="first"/>
+                <!-- 在主菜单中覆盖文本 -->
+                <override-text place="MainMenu" text="Pop Dialog Action"/>
+                <!-- 键盘快捷键 -->
+                <keyboard-shortcut first-keystroke="control alt A" second-keystroke="C" keymap="$default"/>
+                <!-- 鼠标快捷键 -->
+                <mouse-shortcut keystroke="control button3 doubleClick" keymap="$default"/>
+            </action>
+        </group>
+        <group id="codeSnapAction" text="CodeSnap" popup="true" icon="SdkIcons.Sdk_default_icon">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <action id="Copy into clipboard" class="com.github.raoe.codesnapidea.actions.DefaultCodeSnapAction" text="Copy into Clipboard"/>
+            <action id="Copy PNG into clipboard" class="com.github.raoe.codesnapidea.actions.PngCodeSnapAction" text="Copy PNG into Clipboar"/>
+            <action id="Copy SVG into clipboard" class="com.github.raoe.codesnapidea.actions.SvgCodeSnapAction" text="Copy SVG into Clipboard"/>
+            <action id="Copy ASCII into clipboard" class="com.github.raoe.codesnapidea.actions.AsciiCodeSnapAction" text="Copy ASCII into Clipboard"/>
+            <action id="Copy into deskTop" class="com.github.raoe.codesnapidea.actions.DefaultDeskTopCodeSnapAction" text="Copy into deskTop"/>
+        </group>
+    </actions>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 注册配置页面 -->
+        <applicationConfigurable parentId="tools" id="CodeSnapConfigurable" instance="com.github.raoe.codesnapidea.configuration.CodeSnap"/>
+    </extensions>
 </idea-plugin>

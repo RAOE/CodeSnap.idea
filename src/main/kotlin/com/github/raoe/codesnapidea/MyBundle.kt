@@ -6,7 +6,6 @@ import org.jetbrains.annotations.PropertyKey
 
 @NonNls
 private const val BUNDLE = "messages.MyBundle"
-//just a test
 object MyBundle : DynamicBundle(BUNDLE) {
 
     @JvmStatic
