@@ -2,7 +2,6 @@ package com.github.raoe.codesnapidea.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -17,9 +16,6 @@ import java.nio.file.StandardCopyOption
 import java.util.UUID
 import javax.swing.Icon
 import kotlin.jvm.java
-import com.intellij.openapi.diagnostic.thisLogger
-import groovy.util.logging.Log4j2
-import org.apache.log4j.Logger
 import org.slf4j.LoggerFactory
 /**
  *  ClassName：DefaultCodeSnapAction
@@ -34,6 +30,8 @@ open class DefaultCodeSnapAction: AnAction() {
     var formatter = ".png";
     //生成到桌面还是剪贴板 默认剪贴板
     var outputToClipboard = true;
+    //生成类型为img还是ascii
+    var outputToImg = true;
     companion object {
         // 初始化 Slf4j 日志记录器
         private val logger = LoggerFactory.getLogger(DefaultCodeSnapAction::class.java)
@@ -58,7 +56,7 @@ open class DefaultCodeSnapAction: AnAction() {
         if (!selectedText.isNullOrEmpty()) {
             if (codesnapExeExists) {
                 try {
-                    executeCommand(codesnapExePath, selectedText, message,formatter)
+                    executeCommand(codesnapExePath, selectedText, message,formatter,outputToImg)
                     message.append("\nSnapshot saved to ${System.getProperty("user.home")}\\desktop\\output"+formatter+" successful!")
                 } catch (e: IOException) {
                     message.append("\n执行 codesnap.exe excuted failed! Error message：${e.message}")
@@ -117,7 +115,7 @@ open class DefaultCodeSnapAction: AnAction() {
     /**
      * 执行命令
      */
-    private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder,format:String):String {
+    private fun executeCommand(codesnapExePath: String, selectedText: String, message: StringBuilder,format: String,outputImgType: Boolean):String {
         try {
             val userHome = System.getProperty("user.home")
             val tempDir = File(userHome, "codeSnap")
@@ -133,6 +131,11 @@ open class DefaultCodeSnapAction: AnAction() {
                 command = """$codesnapExePath -c "$selectedText" --output clipboard"""
             }else{
                 command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format
+            }
+            if(outputImgType){
+                command = command +""" --type image"""
+            }else{
+                command = command +""" --type ascii"""
             }
             println("command: $command")
             val process = Runtime.getRuntime().exec(command)

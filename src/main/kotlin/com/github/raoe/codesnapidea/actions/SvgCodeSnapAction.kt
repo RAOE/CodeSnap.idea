@@ -13,6 +13,7 @@ class SvgCodeSnapAction: DefaultCodeSnapAction() {
     //重写actionPerformed
     override fun actionPerformed(event: AnActionEvent) {
         formatter = ".svg"
+        outputToClipboard = true;
         super.actionPerformed(event)
     }
 }
