@@ -57,7 +57,7 @@ open class DefaultCodeSnapAction: AnAction() {
             if (codesnapExeExists) {
                 try {
                     executeCommand(codesnapExePath, selectedText, message,formatter,outputToImg)
-                    message.append("\nSnapshot saved to ${System.getProperty("user.home")}\\desktop\\output"+formatter+" successful!")
+                    message.append("\n  process execute success!")
                 } catch (e: IOException) {
                     message.append("\n执行 codesnap.exe excuted failed! Error message：${e.message}")
                 }
@@ -125,10 +125,9 @@ open class DefaultCodeSnapAction: AnAction() {
             val tempFile = File(tempDir, UUID.randomUUID().toString()+".txt")
             tempFile.writeText(selectedText)
             val tempFilePath = tempFile.absolutePath
-            val selectedText = selectedText.trimIndent().replace("\"", "\\\"").replace("\n", "\\n")
-            var command = """$codesnapExePath -c $selectedText --output clipboard"""
+            var command = """$codesnapExePath -f $tempFilePath --output clipboard"""
             if(outputToClipboard){
-                command = """$codesnapExePath -c "$selectedText" --output clipboard"""
+                command = """$codesnapExePath -f "$tempFilePath" --output clipboard"""
             }else{
                 command = "$codesnapExePath -f $tempFilePath --output $userHome\\desktop\\output"+format
             }
