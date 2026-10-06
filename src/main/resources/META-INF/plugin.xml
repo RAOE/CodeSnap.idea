@@ -20,8 +20,8 @@
     <actions>
         <action id="com.github.raoe.codesnapidea.actions.CopyCodeSnapshotAction"
                 class="com.github.raoe.codesnapidea.actions.CopyCodeSnapshotAction"
-                text="%action.copySnapshot.text"
-                description="%action.copySnapshot.description">
+                text="Copy Code Snapshot"
+                description="Copy the selected code (or the whole file) as a syntax-highlighted image to the clipboard">
             <add-to-group group-id="EditMenu" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="control alt shift C"/>
