@@ -10,9 +10,21 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.raoe.codesnapidea.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <notificationGroup id="CodeSnap.idea" displayType="BALLOON" isLogByDefault="false"/>
     </extensions>
 
     <applicationListeners>
         <listener class="com.github.raoe.codesnapidea.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
+
+    <actions>
+        <action id="com.github.raoe.codesnapidea.actions.CopyCodeSnapshotAction"
+                class="com.github.raoe.codesnapidea.actions.CopyCodeSnapshotAction"
+                text="%action.copySnapshot.text"
+                description="%action.copySnapshot.description">
+            <add-to-group group-id="EditMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="control alt shift C"/>
+        </action>
+    </actions>
 </idea-plugin>
