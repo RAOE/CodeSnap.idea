@@ -20,7 +20,7 @@ Copy the selected code as a syntax-highlighted image to the clipboard in one act
 
 - Copy selection, or the whole file when nothing is selected
 - Respects your color scheme, editor font and tab size
-- Trigger from <kbd>Edit</kbd> menu, the editor context menu, or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>
+- Trigger from <kbd>Edit</kbd> menu, the editor context menu, or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
 - Balloon notification confirms the snapshot is on your clipboard
 <!-- Plugin description end -->
 
@@ -29,7 +29,7 @@ Copy the selected code as a syntax-highlighted image to the clipboard in one act
 - 📋 **Copy code as image** — the selected code (or the entire file, if nothing is selected) is rendered and copied to the clipboard as a PNG.
 - 🎨 **Native look** — uses your editor's color scheme, font and tab size, so dark and light themes both look exactly like your IDE.
 - 🔍 **Sharp output** — rendered at 2x scale with antialiasing and rounded corners; paste it anywhere without it looking blurry.
-- ⌨️ **Easy to trigger** — <kbd>Edit</kbd> menu, right-click context menu, or the <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> shortcut.
+- ⌨️ **Easy to trigger** — <kbd>Edit</kbd> menu, right-click context menu, or the <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> shortcut.
 - 🔔 **Feedback** — a balloon notification shows the size of the copied snapshot.
 
 ## 🚀 Development

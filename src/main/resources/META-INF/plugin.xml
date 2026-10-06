@@ -24,7 +24,7 @@
                 description="Copy the selected code (or the whole file) as a syntax-highlighted image to the clipboard">
             <add-to-group group-id="EditMenu" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="control alt shift C"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="control alt shift P"/>
         </action>
     </actions>
 </idea-plugin>
