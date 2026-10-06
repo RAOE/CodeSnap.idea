@@ -1,7 +1,8 @@
 <img width="390" src="/doc/logo.png" />
 
-> [!WARNING]  
-> Notice: This project is still in WIP, and hasn't published to plugin market yet.
+> [!NOTE]  
+> Not on JetBrains Marketplace yet — download the latest zip from the
+> [Releases page](https://github.com/RAOE/CodeSnap.idea/releases) and install it manually (requires IntelliJ Platform 2023.3+).
 
 # CodeSnap.idea
 
@@ -16,10 +17,11 @@ Select some code, copy it as a syntax-highlighted image, and paste it anywhere �
 <!-- Plugin description -->
 **CodeSnap.idea — capture code snapshots inside IntelliJ IDEA.**
 
-Copy the selected code as a syntax-highlighted image to the clipboard in one action. The snapshot is rendered with your current editor color scheme and font, so it looks exactly like your IDE — dark or light themes included. Rendered at 2x resolution for crisp pasting into documents, chats and slides.
+Copy the selected code as a syntax-highlighted image to the clipboard in one action. The snapshot is rendered with your current editor color scheme and font, so it looks exactly like your IDE — dark or light themes included. Rendered at 2x resolution by default (1x–3x configurable) for crisp pasting into documents, chats and slides.
 
 - Copy selection, or the whole file when nothing is selected
 - Respects your color scheme, editor font and tab size
+- Configurable: snapshot scale (1x–3x), padding, optional line numbers and save-to-file
 - Trigger from <kbd>Edit</kbd> menu, the editor context menu, or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
 - Balloon notification confirms the snapshot is on your clipboard
 <!-- Plugin description end -->
@@ -28,7 +30,8 @@ Copy the selected code as a syntax-highlighted image to the clipboard in one act
 
 - 📋 **Copy code as image** — the selected code (or the entire file, if nothing is selected) is rendered and copied to the clipboard as a PNG.
 - 🎨 **Native look** — uses your editor's color scheme, font and tab size, so dark and light themes both look exactly like your IDE.
-- 🔍 **Sharp output** — rendered at 2x scale with antialiasing and rounded corners; paste it anywhere without it looking blurry.
+- 🔍 **Sharp output** — rendered at 2x scale by default (configurable 1x–3x) with antialiasing and rounded corners; paste it anywhere without it looking blurry.
+- ⚙️ **Configurable** — snapshot scale, padding, optional line numbers and save-to-file at <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>CodeSnap.idea</kbd>.
 - ⌨️ **Easy to trigger** — <kbd>Edit</kbd> menu, right-click context menu, or the <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> shortcut.
 - 🔔 **Feedback** — a balloon notification shows the size of the copied snapshot.
 
@@ -42,7 +45,10 @@ Copy the selected code as a syntax-highlighted image to the clipboard in one act
 
 ## Installation
 
-Once published to the JetBrains Marketplace, the plugin can be installed via:
+- From GitHub Releases (available now): download `CodeSnap.idea-*.zip` from the [Releases page](https://github.com/RAOE/CodeSnap.idea/releases), then install it via
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+
+Once published to the JetBrains Marketplace, the plugin can also be installed via:
 
 - Using the IDE built-in plugin system:
 

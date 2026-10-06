@@ -1,6 +1,7 @@
 package com.github.raoe.codesnapidea.actions
 
 import com.github.raoe.codesnapidea.MyBundle
+import com.github.raoe.codesnapidea.settings.CodeSnapSettings
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -9,6 +10,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.HighlighterColors
+import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.project.Project
@@ -21,6 +23,11 @@ import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.awt.datatransfer.UnsupportedFlavorException
 import java.awt.image.BufferedImage
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import javax.imageio.ImageIO
 
 /**
  * Copies the selected code, or the whole file when nothing is selected,
@@ -59,7 +66,38 @@ class CopyCodeSnapshotAction : AnAction() {
         }
 
         Toolkit.getDefaultToolkit().systemClipboard.setContents(ImageTransferable(image), null)
-        notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
+        val settings = CodeSnapSettings.getInstance()
+        if (settings.saveToFile) {
+            runCatching { saveSnapshotFile(image) }.fold(
+                onSuccess = { file ->
+                    notify(project, MyBundle.message("notification.copiedAndSaved", image.width, image.height, file.name), NotificationType.INFORMATION)
+                },
+                onFailure = { t ->
+                    notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
+                    notify(project, MyBundle.message("notification.saveFailed", t.message ?: t.javaClass.simpleName), NotificationType.WARNING)
+                }
+            )
+        } else {
+            notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
+        }
+    }
+
+    private fun saveSnapshotFile(image: BufferedImage): File {
+        val settings = CodeSnapSettings.getInstance()
+        val dirPath = settings.saveDirectory.ifBlank { System.getProperty("user.home") ?: "." }
+        val dir = File(dirPath)
+        if (!dir.isDirectory && !dir.mkdirs()) {
+            throw IOException("cannot create directory: $dirPath")
+        }
+        val stamp = SimpleDateFormat("yyyyMMdd-HHmmss").format(Date())
+        var file = File(dir, "codesnap-$stamp.png")
+        var suffix = 2
+        while (file.exists()) {
+            file = File(dir, "codesnap-$stamp-$suffix.png")
+            suffix++
+        }
+        ImageIO.write(image, "png", file)
+        return file
     }
 
     private fun notify(project: Project?, message: String, type: NotificationType) {
@@ -81,7 +119,8 @@ class CopyCodeSnapshotAction : AnAction() {
         val collected = collectLines(editor, scheme, start, end)
         val lines = if (collected.size > 1 && collected.last().isEmpty()) collected.dropLast(1) else collected
 
-        val scale = 2.0
+        val settings = CodeSnapSettings.getInstance()
+        val scale = settings.scale.coerceIn(1, 3).toDouble()
         val schemeFont = scheme.getFont(EditorFontType.PLAIN)
         val baseFont = schemeFont.deriveFont((schemeFont.size * scale).toFloat()).deriveFont(Font.PLAIN)
 
@@ -90,7 +129,7 @@ class CopyCodeSnapshotAction : AnAction() {
         val baseMetrics = scratchGraphics.getFontMetrics(baseFont)
         val lineHeight = baseMetrics.height
         val ascent = baseMetrics.ascent
-        val padding = (20 * scale).toInt()
+        val padding = (settings.padding.coerceIn(0, 100) * scale).toInt()
 
         val rows = ArrayList<List<Piece>>(lines.size)
         var maxWidth = 0
@@ -110,9 +149,18 @@ class CopyCodeSnapshotAction : AnAction() {
             if (x > maxWidth) maxWidth = x
             rows.add(pieces)
         }
+
+        val firstLine = editor.document.getLineNumber(start) + 1
+        val numberGap = (16 * scale).toInt()
+        val numberGutter = if (settings.showLineNumbers && rows.isNotEmpty()) {
+            scratchGraphics.getFontMetrics(baseFont).stringWidth((firstLine + rows.size - 1).toString()) + numberGap
+        } else {
+            0
+        }
         scratchGraphics.dispose()
 
-        val imageWidth = maxWidth + padding * 2
+        val codeOffset = padding + numberGutter
+        val imageWidth = maxWidth + codeOffset + padding
         val imageHeight = rows.size * lineHeight + padding * 2
         if (imageWidth > 20_000 || imageHeight > 20_000) return null
 
@@ -125,12 +173,24 @@ class CopyCodeSnapshotAction : AnAction() {
             g.color = scheme.defaultBackground ?: Color(0x2B2B2B)
             val corner = (12 * scale).toInt()
             g.fillRoundRect(0, 0, imageWidth, imageHeight, corner, corner)
+
+            if (numberGutter > 0) {
+                g.font = baseFont
+                g.color = scheme.getColor(EditorColors.LINE_NUMBERS_COLOR) ?: Color(0x9AA0A6)
+                val metrics = g.fontMetrics
+                rows.indices.forEach { index ->
+                    val baseline = padding + index * lineHeight + ascent
+                    val numberText = (firstLine + index).toString()
+                    g.drawString(numberText, padding + numberGutter - numberGap - metrics.stringWidth(numberText), baseline)
+                }
+            }
+
             rows.forEachIndexed { index, pieces ->
                 val baseline = padding + index * lineHeight + ascent
                 for (piece in pieces) {
                     g.font = piece.font
                     g.color = piece.color
-                    g.drawString(piece.text, padding + piece.x, baseline)
+                    g.drawString(piece.text, codeOffset + piece.x, baseline)
                 }
             }
         } finally {

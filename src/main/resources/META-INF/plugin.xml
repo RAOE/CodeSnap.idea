@@ -9,13 +9,11 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.raoe.codesnapidea.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <notificationGroup id="CodeSnap.idea" displayType="BALLOON" isLogByDefault="false"/>
+        <applicationConfigurable parentId="tools" id="com.github.raoe.codesnapidea.settings"
+                                 displayName="CodeSnap.idea"
+                                 instance="com.github.raoe.codesnapidea.settings.CodeSnapConfigurable"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.raoe.codesnapidea.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
 
     <actions>
         <action id="com.github.raoe.codesnapidea.actions.CopyCodeSnapshotAction"

@@ -55,12 +55,14 @@ intellijPlatform {
     pluginConfiguration {
         version = providers.gradleProperty("pluginVersion")
 
-        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest.
+        // Read as UTF-8 explicitly: the platform default charset (GBK on Chinese Windows) would mangle "—" etc.
+        description = providers.provider {
+            val readme = layout.projectDirectory.file("README.md").asFile.readText(Charsets.UTF_8)
             val start = "<!-- Plugin description -->"
             val end = "<!-- Plugin description end -->"
 
-            with(it.lines()) {
+            with(readme.lines()) {
                 if (!containsAll(listOf(start, end))) {
                     throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
                 }
