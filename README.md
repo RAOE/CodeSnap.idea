@@ -14,6 +14,12 @@ Select some code, copy it as a syntax-highlighted image, and paste it anywhere �
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
+## Example
+
+<img src="/doc/example.png" alt="A code snapshot produced by CodeSnap.idea" width="720">
+
+This image was produced by CodeSnap.idea itself: the comment shown in it says it all — select code, press the shortcut, paste.
+
 <!-- Plugin description -->
 **CodeSnap.idea — capture code snapshots inside IntelliJ IDEA.**
 
@@ -23,6 +29,7 @@ Copy the selected code as a syntax-highlighted image to the clipboard in one act
 - Respects your color scheme, editor font and tab size
 - Configurable: snapshot scale (1x–3x), padding, optional line numbers and save-to-file
 - Trigger from <kbd>Edit</kbd> menu, the editor context menu, or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
+- Rendered in the background — the IDE stays responsive even for large files
 - Balloon notification confirms the snapshot is on your clipboard
 <!-- Plugin description end -->
 
@@ -32,6 +39,7 @@ Copy the selected code as a syntax-highlighted image to the clipboard in one act
 - 🎨 **Native look** — uses your editor's color scheme, font and tab size, so dark and light themes both look exactly like your IDE.
 - 🔍 **Sharp output** — rendered at 2x scale by default (configurable 1x–3x) with antialiasing and rounded corners; paste it anywhere without it looking blurry.
 - ⚙️ **Configurable** — snapshot scale, padding, optional line numbers and save-to-file at <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>CodeSnap.idea</kbd>.
+- ⚡ **Non-blocking** — the snapshot is rendered and the PNG file is written on a background thread; even very large selections never freeze the IDE.
 - ⌨️ **Easy to trigger** — <kbd>Edit</kbd> menu, right-click context menu, or the <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> shortcut.
 - 🔔 **Feedback** — a balloon notification shows the size of the copied snapshot.
 
