@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.EditorColors
@@ -33,6 +34,10 @@ import javax.imageio.ImageIO
  * Copies the selected code, or the whole file when nothing is selected,
  * to the clipboard as a syntax-highlighted image rendered with the
  * editor's current color scheme.
+ *
+ * Editor data is collected on the EDT; the (heavier) image rendering and
+ * PNG writing happen on a background thread so large files cannot block
+ * the UI.
  */
 class CopyCodeSnapshotAction : AnAction() {
 
@@ -54,37 +59,68 @@ class CopyCodeSnapshotAction : AnAction() {
             return
         }
 
-        val image = try {
-            renderSnapshot(editor, start, end)
+        val renderData = try {
+            collectRenderData(editor, start, end)
         } catch (t: Throwable) {
             notify(project, MyBundle.message("notification.renderFailed", t.message ?: t.javaClass.simpleName), NotificationType.ERROR)
             return
         }
-        if (image == null) {
-            notify(project, MyBundle.message("notification.tooLarge"), NotificationType.WARNING)
-            return
-        }
 
-        Toolkit.getDefaultToolkit().systemClipboard.setContents(ImageTransferable(image), null)
         val settings = CodeSnapSettings.getInstance()
-        if (settings.saveToFile) {
-            runCatching { saveSnapshotFile(image) }.fold(
-                onSuccess = { file ->
-                    notify(project, MyBundle.message("notification.copiedAndSaved", image.width, image.height, file.name), NotificationType.INFORMATION)
-                },
-                onFailure = { t ->
-                    notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
-                    notify(project, MyBundle.message("notification.saveFailed", t.message ?: t.javaClass.simpleName), NotificationType.WARNING)
+        val scale = settings.scale.coerceIn(1, 3)
+        val padding = settings.padding.coerceIn(0, 100)
+        val showLineNumbers = settings.showLineNumbers
+        val saveToFile = settings.saveToFile
+        val saveDirectory = settings.saveDirectory
+
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val image = try {
+                renderSnapshot(renderData, scale, padding, showLineNumbers)
+            } catch (t: Throwable) {
+                ApplicationManager.getApplication().invokeLater {
+                    notify(project, MyBundle.message("notification.renderFailed", t.message ?: t.javaClass.simpleName), NotificationType.ERROR)
                 }
-            )
-        } else {
-            notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
+                return@executeOnPooledThread
+            }
+            if (image == null) {
+                ApplicationManager.getApplication().invokeLater {
+                    notify(project, MyBundle.message("notification.tooLarge"), NotificationType.WARNING)
+                }
+                return@executeOnPooledThread
+            }
+
+            var saveError: Throwable? = null
+            val savedFile = if (saveToFile) {
+                try {
+                    saveSnapshotFile(image, saveDirectory)
+                } catch (t: Throwable) {
+                    saveError = t
+                    null
+                }
+            } else {
+                null
+            }
+
+            ApplicationManager.getApplication().invokeLater {
+                Toolkit.getDefaultToolkit().systemClipboard.setContents(ImageTransferable(image), null)
+                when {
+                    savedFile != null ->
+                        notify(project, MyBundle.message("notification.copiedAndSaved", image.width, image.height, savedFile.name), NotificationType.INFORMATION)
+
+                    saveError != null -> {
+                        notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
+                        notify(project, MyBundle.message("notification.saveFailed", saveError!!.let { it.message ?: it.javaClass.simpleName }), NotificationType.WARNING)
+                    }
+
+                    else ->
+                        notify(project, MyBundle.message("notification.copied", image.width, image.height), NotificationType.INFORMATION)
+                }
+            }
         }
     }
 
-    private fun saveSnapshotFile(image: BufferedImage): File {
-        val settings = CodeSnapSettings.getInstance()
-        val dirPath = settings.saveDirectory.ifBlank { System.getProperty("user.home") ?: "." }
+    private fun saveSnapshotFile(image: BufferedImage, saveDirectory: String): File {
+        val dirPath = saveDirectory.ifBlank { System.getProperty("user.home") ?: "." }
         val dir = File(dirPath)
         if (!dir.isDirectory && !dir.mkdirs()) {
             throw IOException("cannot create directory: $dirPath")
@@ -107,20 +143,23 @@ class CopyCodeSnapshotAction : AnAction() {
             .notify(project)
     }
 
-    /** Returns null when the text is too large to render as a single image. */
-    private fun renderSnapshot(editor: Editor, start: Int, end: Int): BufferedImage? {
+    private fun collectRenderData(editor: Editor, start: Int, end: Int): RenderData {
         val scheme = editor.colorsScheme
         val tabSize = try {
             editor.settings.getTabSize(editor.project)
         } catch (_: Throwable) {
             4
         }.coerceAtLeast(1)
-
         val collected = collectLines(editor, scheme, start, end)
         val lines = if (collected.size > 1 && collected.last().isEmpty()) collected.dropLast(1) else collected
+        val firstLine = editor.document.getLineNumber(start) + 1
+        return RenderData(scheme, tabSize, lines, firstLine)
+    }
 
-        val settings = CodeSnapSettings.getInstance()
-        val scale = settings.scale.coerceIn(1, 3).toDouble()
+    /** Returns null when the text is too large to render as a single image. */
+    private fun renderSnapshot(data: RenderData, scale: Int, paddingAt1x: Int, showLineNumbers: Boolean): BufferedImage? {
+        val scheme = data.scheme
+        val scaleF = scale.toDouble()
         val schemeFont = scheme.getFont(EditorFontType.PLAIN)
         val baseFont = schemeFont.deriveFont((schemeFont.size * scale).toFloat()).deriveFont(Font.PLAIN)
 
@@ -129,16 +168,16 @@ class CopyCodeSnapshotAction : AnAction() {
         val baseMetrics = scratchGraphics.getFontMetrics(baseFont)
         val lineHeight = baseMetrics.height
         val ascent = baseMetrics.ascent
-        val padding = (settings.padding.coerceIn(0, 100) * scale).toInt()
+        val padding = (paddingAt1x * scaleF).toInt()
 
-        val rows = ArrayList<List<Piece>>(lines.size)
+        val rows = ArrayList<List<Piece>>(data.lines.size)
         var maxWidth = 0
-        for (line in lines) {
+        for (line in data.lines) {
             var column = 0
             var x = 0
             val pieces = ArrayList<Piece>(line.size)
             for (run in line) {
-                val segment = expandTabs(run.text, column, tabSize)
+                val segment = expandTabs(run.text, column, data.tabSize)
                 if (segment.isEmpty()) continue
                 column += segment.length
                 val font = baseFont.deriveFont(run.fontType)
@@ -150,10 +189,9 @@ class CopyCodeSnapshotAction : AnAction() {
             rows.add(pieces)
         }
 
-        val firstLine = editor.document.getLineNumber(start) + 1
-        val numberGap = (16 * scale).toInt()
-        val numberGutter = if (settings.showLineNumbers && rows.isNotEmpty()) {
-            scratchGraphics.getFontMetrics(baseFont).stringWidth((firstLine + rows.size - 1).toString()) + numberGap
+        val numberGap = (16 * scaleF).toInt()
+        val numberGutter = if (showLineNumbers && rows.isNotEmpty()) {
+            scratchGraphics.getFontMetrics(baseFont).stringWidth((data.firstLine + rows.size - 1).toString()) + numberGap
         } else {
             0
         }
@@ -169,9 +207,10 @@ class CopyCodeSnapshotAction : AnAction() {
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+            g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
             g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
             g.color = scheme.defaultBackground ?: Color(0x2B2B2B)
-            val corner = (12 * scale).toInt()
+            val corner = (12 * scaleF).toInt()
             g.fillRoundRect(0, 0, imageWidth, imageHeight, corner, corner)
 
             if (numberGutter > 0) {
@@ -180,7 +219,7 @@ class CopyCodeSnapshotAction : AnAction() {
                 val metrics = g.fontMetrics
                 rows.indices.forEach { index ->
                     val baseline = padding + index * lineHeight + ascent
-                    val numberText = (firstLine + index).toString()
+                    val numberText = (data.firstLine + index).toString()
                     g.drawString(numberText, padding + numberGutter - numberGap - metrics.stringWidth(numberText), baseline)
                 }
             }
@@ -274,6 +313,13 @@ class CopyCodeSnapshotAction : AnAction() {
             return image
         }
     }
+
+    private class RenderData(
+        val scheme: EditorColorsScheme,
+        val tabSize: Int,
+        val lines: List<List<Run>>,
+        val firstLine: Int,
+    )
 
     private class Run(val text: String, val fg: Color, val fontType: Int)
 
